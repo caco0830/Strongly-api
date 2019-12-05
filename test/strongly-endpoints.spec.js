@@ -1,5 +1,6 @@
 const knex = require('knex');
 const app = require('../app');
+const {makeWorkouts} = require('./strongly.fixtures');
 
 describe('Strongly Endpoints', function(){
     let db;
@@ -22,16 +23,25 @@ describe('Strongly Endpoints', function(){
         context('Given no workouts', () => {
             it('reponds with 200 and an empty list', () => {
                 return supertest(app)
-                    .get('/api/folders')
+                    .get('/api/workouts')
                     .expect(200, []);
             });
         });
-            
 
+        context.only('Given there are workouts', () => {
+             const testWorkouts =  makeWorkouts();
+             
+             beforeEach('insert workouts', () => {
+                 return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts)
+             });
 
-         
+             it('responds with 200 and all of the workouts', () => {
+                 return supertest(app)
+                    .get('/api/workouts')
+                    .expect(200, testWorkouts);
+             });
+        });
     });
-
-
-
 });
