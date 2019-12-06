@@ -28,7 +28,7 @@ describe('Strongly Endpoints', function(){
             });
         });
 
-        context.only('Given there are workouts', () => {
+        context('Given there are workouts', () => {
              const testWorkouts =  makeWorkouts();
              
              beforeEach('insert workouts', () => {
@@ -42,6 +42,91 @@ describe('Strongly Endpoints', function(){
                     .get('/api/workouts')
                     .expect(200, testWorkouts);
              });
+        });
+    });
+
+    describe('POST /api/workouts', () => {
+        it('created workout, responding with 201 and new workout', () => {
+            const newWorkout = {
+                title: 'Test Workout'
+            }
+
+            return supertest(app)
+                .post('/api/workouts')
+                .send(newWorkout)
+                .expect(201)
+                .expect(res => {
+                    console.log(res.body);
+                    expect(res.body.title).to.eql(newWorkout.title);
+                    expect(res.body).to.have.property('id');
+                });
+        });
+    });
+
+    describe('GET /api/workouts/workout_id', () => {
+        context('Given no workouts', () => {
+            it('responds with 404', () => {
+                const workoutId = 234;
+                return supertest(app)
+                    .get(`/api/workouts/${workoutId}`)
+                    .expect(404, {error: {message: `Workout doesn't exist`}});
+            });
+        });
+
+        context('Given there are workouts', () => {
+            const testWorkouts = makeWorkouts();
+
+            beforeEach('insert workouts', () => {
+                return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts);
+            });
+
+            it('responds with 200 and the specified workout', () => {
+                const workoutId = 2;
+                const expectedWorkout = testWorkouts[workoutId-1];
+                return supertest(app)
+                    .get(`/api/workouts/${workoutId}`)
+                    .expect(200, expectedWorkout);
+            });
+
+
+        });
+    });
+
+    describe('DELETE /api/workouts/workout_id', () => {
+        context('Given no workouts', () => {
+            it('responds with 404', () => {
+                const workoutId = 123;
+                return supertest(app)
+                    .delete(`/api/workouts/${workoutId}`)
+                    .expect(404, {error: {message: `Workout doesn't exist`}});
+            });
+        });
+
+        context.only('Given there are workouts', () => {
+            const testWorkouts = makeWorkouts();
+
+            beforeEach('insert workouts', () => {
+                return db 
+                    .into('strongly_workouts')
+                    .insert(testWorkouts);
+            });
+
+            it('responds with 204 and deletes the workout', () => {
+                const workoutId = 2;
+                const expectedWorkouts = testWorkouts.filter(workout => workout.id !== workoutId);
+
+                return supertest(app)
+                    .delete(`/api/workouts/${workoutId}`)
+                    .expect(204)
+                    .then(res => 
+                        supertest(app)
+                        .get('/api/workouts')
+                        .expect(expectedWorkouts)
+                        );
+            });
+
         });
     });
 });

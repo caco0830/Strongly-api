@@ -9,7 +9,20 @@ const WorkoutsService = {
             .returning('*')
             . then(rows => {
                 return rows[0];
+                
             });
+    },
+    getById(knex, id){
+        return knex
+            .from('strongly_workouts')
+            .select('*')
+            .where('id', id)
+            .first();
+    },
+    deleteWorkout(knex, id){
+        return knex('strongly_workouts')
+            .where({id})
+            .delete();
     }
 
 }
