@@ -4,7 +4,9 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const {NODE_ENV} = require('./src/config');
-const workoutsRouter = require('./src/workouts/workouts-router')
+const workoutsRouter = require('./src/workouts/workouts-router');
+const exercisesRouter = require('./src/exercises/exercises-router');
+const setsRouter = require('./src/sets/sets-router');
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use(helmet());
 app.use(cors());
 
 app.use('/api/workouts', workoutsRouter);
+app.use('/api/exercises', exercisesRouter);
+app.use('/api/sets', setsRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello, world!');

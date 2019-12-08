@@ -1,6 +1,6 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts} = require('./strongly.fixtures');
+const {makeWorkouts, makeExercises, makeSets} = require('./strongly.fixtures');
 
 describe('Strongly Endpoints', function(){
     let db;
@@ -45,6 +45,134 @@ describe('Strongly Endpoints', function(){
         });
     });
 
+    describe('GET /api/exercises', () => {
+        context('Given no exercises', () => {
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/api/exercises')
+                    .expect(200, []);
+            });
+        });
+
+        context('Given there are exercises', () => {
+            const testWorkouts = makeWorkouts();
+            const testExercises = makeExercises();
+
+            beforeEach('insert exercises', () => {
+                return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts)
+                    .then(() => {
+                        return db
+                            .into('strongly_exercises')
+                            .insert(testExercises);
+                    });
+            });
+
+            it('responds with 200 and all of the exercises', () => {
+                return supertest(app)
+                    .get('/api/exercises')
+                    .expect(200, testExercises);
+            });
+        });
+    });
+
+    
+
+    //TODO: get exercises by workout id
+    describe('GET /api/exercises?workout_id=workout_id', () => {
+        const workoutId = 1;
+        context('Given no exercises', () => {
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get(`/api/exercises?workout_id=${workoutId}`)
+                    .expect(200, []);
+            });
+        });
+
+        context('Given there are exercises for workout in query', () => {
+            const testWorkouts = makeWorkouts();
+            const testExercises = makeExercises();
+            const expectedExercises = testExercises.filter(ex => {return ex.workout_id === workoutId});
+
+            beforeEach('insert exercises', () => {
+                return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts)
+                    .then(() => {
+                        return db
+                            .into('strongly_exercises')
+                            .insert(testExercises);
+                    });
+            });
+
+            it('responds with 200 and all of the exercises', () => {
+                return supertest(app)
+                    .get(`/api/exercises?workout_id=${workoutId}`)
+                    .expect(200, expectedExercises);
+            });
+        });
+
+        context('Given an invalid query', () => {
+
+            it('responds with 404', () => {
+                return supertest(app)
+                    .get(`/api/exercises?invalid=123`)
+                    .expect(404, {error: {message: `invalid is not a valid query`}});
+            });
+        });
+    });
+
+
+    describe('GET /api/sets', () => {
+        context('Given no sets', () => {
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/api/sets')
+                    .expect(200, []);
+            });
+        });
+
+        context('Given there are sets in the database', () => {
+            const testWorkouts = makeWorkouts();
+            const testExercises = makeExercises();
+            const testSets = makeSets();
+
+            beforeEach('insert data', () => {
+                return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts)
+                    .then(() => {
+                        return db
+                            .into('strongly_exercises')
+                            .insert(testExercises)
+                            .then(() => {
+                               return db
+                                    .into('strongly_sets') 
+                                    .insert(testSets);
+                            });
+                    });
+            });
+
+            it('responds with 200 and a list of sets', () => {
+                return supertest(app)
+                    .get('/api/sets')
+                    .expect(200, testSets);
+            });
+        });
+    });
+
+    
+    //TODO: get sets by exercise id
+    //TODO: get get sets by workout id
+    //TODO: get sets by exercise id
+    //TOOD: POST exercises
+    //TODO: POST sets
+    //TODO: delete exercises
+    //TODO: delete sets
+
+
+
     describe('POST /api/workouts', () => {
         it('created workout, responding with 201 and new workout', () => {
             const newWorkout = {
@@ -56,7 +184,6 @@ describe('Strongly Endpoints', function(){
                 .send(newWorkout)
                 .expect(201)
                 .expect(res => {
-                    console.log(res.body);
                     expect(res.body.title).to.eql(newWorkout.title);
                     expect(res.body).to.have.property('id');
                 });
@@ -104,7 +231,7 @@ describe('Strongly Endpoints', function(){
             });
         });
 
-        context.only('Given there are workouts', () => {
+        context('Given there are workouts', () => {
             const testWorkouts = makeWorkouts();
 
             beforeEach('insert workouts', () => {
