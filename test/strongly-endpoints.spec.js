@@ -18,7 +18,7 @@ describe('Strongly Endpoints', function(){
     before('clean the table', () => db.raw('TRUNCATE strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
 
     afterEach('cleanup', () => db.raw('TRUNCATE strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
-
+   
     describe('GET /api/workouts', () => {
         context('Given no workouts', () => {
             it('reponds with 200 and an empty list', () => {
@@ -42,6 +42,37 @@ describe('Strongly Endpoints', function(){
                     .get('/api/workouts')
                     .expect(200, testWorkouts);
              });
+        });
+    });
+
+    describe('GET /api/workouts/workout_id', () => {
+        context('Given no workouts', () => {
+            it('responds with 404', () => {
+                const workoutId = 234;
+                return supertest(app)
+                    .get(`/api/workouts/${workoutId}`)
+                    .expect(404, {error: {message: `Workout doesn't exist`}});
+            });
+        });
+
+        context('Given there are workouts', () => {
+            const testWorkouts = makeWorkouts();
+
+            beforeEach('insert workouts', () => {
+                return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts);
+            });
+
+            it('responds with 200 and the specified workout', () => {
+                const workoutId = 2;
+                const expectedWorkout = testWorkouts[workoutId-1];
+                return supertest(app)
+                    .get(`/api/workouts/${workoutId}`)
+                    .expect(200, expectedWorkout);
+            });
+
+
         });
     });
 
@@ -77,9 +108,7 @@ describe('Strongly Endpoints', function(){
         });
     });
 
-    
-
-    //TODO: get exercises by workout id
+    //get exercises by workout id
     describe('GET /api/exercises?workout_id=workout_id', () => {
         const workoutId = 1;
         context('Given no exercises', () => {
@@ -123,7 +152,6 @@ describe('Strongly Endpoints', function(){
         });
     });
 
-
     describe('GET /api/sets', () => {
         context('Given no sets', () => {
             it('responds with 200 and an empty list', () => {
@@ -162,19 +190,12 @@ describe('Strongly Endpoints', function(){
         });
     });
 
-    
     //TODO: get sets by exercise id
     //TODO: get get sets by workout id
-    //TODO: get sets by exercise id
-    //TOOD: POST exercises
-    //TODO: POST sets
-    //TODO: delete exercises
-    //TODO: delete sets
 
-
-
+  
     describe('POST /api/workouts', () => {
-        it('created workout, responding with 201 and new workout', () => {
+        it('creates workout, responding with 201 and new workout', () => {
             const newWorkout = {
                 title: 'Test Workout'
             }
@@ -190,36 +211,36 @@ describe('Strongly Endpoints', function(){
         });
     });
 
-    describe('GET /api/workouts/workout_id', () => {
-        context('Given no workouts', () => {
-            it('responds with 404', () => {
-                const workoutId = 234;
-                return supertest(app)
-                    .get(`/api/workouts/${workoutId}`)
-                    .expect(404, {error: {message: `Workout doesn't exist`}});
-            });
+    //POST exercises
+
+    describe('POST /api/exercises', () => {
+        const testWorkouts = makeWorkouts();
+
+        beforeEach('insert data', () => {
+            return db
+                .into('strongly_workouts')
+                .insert(testWorkouts);
         });
 
-        context('Given there are workouts', () => {
-            const testWorkouts = makeWorkouts();
+        it('creates an exercise, responds with 201 and the new exercise', () => {
+            const newExercise = {
+                workout_id : 1,
+                title: 'New'
+            }
 
-            beforeEach('insert workouts', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts);
-            });
-
-            it('responds with 200 and the specified workout', () => {
-                const workoutId = 2;
-                const expectedWorkout = testWorkouts[workoutId-1];
-                return supertest(app)
-                    .get(`/api/workouts/${workoutId}`)
-                    .expect(200, expectedWorkout);
-            });
-
-
+            return supertest(app)
+                .post('/api/exercises')
+                .send(newExercise)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.title).to.eql(newExercise.title);
+                    expect(res.body).to.have.property('id');
+                });
         });
     });
+
+    //TODO: POST sets
+    
 
     describe('DELETE /api/workouts/workout_id', () => {
         context('Given no workouts', () => {
@@ -256,4 +277,57 @@ describe('Strongly Endpoints', function(){
 
         });
     });
+
+    //TODO: delete exercises
+
+    describe.only('DELETE /api/exercises/exercise_id', () => {
+        context('Given no exercises', () => {
+            it('responds with 404', () => {
+                const exerciseId = 1;
+                return supertest(app)
+                    .delete(`/api/exercises/${exerciseId}`)
+                    .expect(404, {error: {message: `Exercise doesn't exist`}});
+            });
+        });
+
+        context('Given there are exercises', () => {
+            const testWorkouts = makeWorkouts();
+            const testExercises = makeExercises();
+
+             beforeEach('insert data', () => {
+                 return db
+                    .into('strongly_workouts')
+                    .insert(testWorkouts)
+                    .then(() => {
+                        return db
+                            .into('strongly_exercises')
+                            .insert(testExercises);
+                    });
+             });
+
+             it('responds with 204 and deletes the exercise', () => {
+                 const exerciseId = 1;
+                 const expectedExercises = testExercises.filter(exercise => exercise.id !== exerciseId);
+
+                 return supertest(app)
+                    .delete(`/api/exercises/${exerciseId}`)
+                    .expect(204)
+                    .then(res => 
+                        supertest(app)
+                        .get('/api/exercises')
+                        .expect(expectedExercises)
+                    );
+             });
+
+
+
+
+
+        });
+
+
+    });
+
+    
+    //TODO: delete sets
 });

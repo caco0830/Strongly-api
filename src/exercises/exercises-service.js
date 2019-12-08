@@ -5,6 +5,28 @@ const ExercisesService = {
     getExercisesByWorkoutId(knex, workoutId){
         //console.log(workoutId)
         return knex.select('*').from('strongly_exercises').where('workout_id', parseInt(workoutId));
+    },
+    getById(knex, id){
+        return knex
+            .from('strongly_exercises')
+            .select('*')
+            .where('id', id)
+            .first();
+
+    },
+    insertExercises(knex, newExercise){
+        return knex
+            .insert(newExercise)
+            .into('strongly_exercises')
+            .returning('*')
+            .then(rows => {
+                return rows[0];
+            });
+    },
+    deleteExercise(knex, id){
+        return knex('strongly_exercises')
+            .where({id})
+            .delete();
     }
 }
 

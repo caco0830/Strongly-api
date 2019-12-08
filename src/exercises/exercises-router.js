@@ -43,5 +43,60 @@ exercisesRouter
         }
         
     })
+    .post(jsonParser, (req, res, next) => {
+        const {title, workout_id} = req.body;
+        const newExercise = {title, workout_id}
+
+        for(const [key, value] of Object.entries(newExercise)){
+            if(value == null){
+                return res.status(400).json({
+                    error: {message: `Missing '${key}' in request body`}
+                });
+            }
+        }
+
+        ExercisesService.insertExercises(
+            req.app.get('db'),
+            newExercise
+        )
+        .then(exercise => {
+            res
+                .status(201)
+                .json(serializeExercises(exercise));
+        })
+        .catch(next);
+    });
+
+exercisesRouter
+    .route('/:exercise_id')
+    .all((req, res, next) => {
+        ExercisesService.getById(
+            req.app.get('db'),
+            req.params.exercise_id
+        )
+        .then(exercise => {
+            if(!exercise){
+                return res.status(404).json({
+                    error: {message: `Exercise doesn't exist`}
+                });
+            }
+            res.exercise = exercise;
+            next();
+        })
+        .catch(next);
+    })
+    .get((req, res, next) => {
+        res.json(serializeExercises(res.exercise));
+    })
+    .delete((req, res, next) => {
+        ExercisesService.deleteExercise(
+            req.app.get('db'),
+            req.params.exercise_id
+        )
+        .then(() => {
+            res.status(204).end();
+        })
+        .catch(next);
+    });
 
 module.exports = exercisesRouter;
