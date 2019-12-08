@@ -190,6 +190,7 @@ describe('Strongly Endpoints', function(){
         });
     });
 
+    //TODO: update methods fo all
     //TODO: get sets by exercise id
     //TODO: get get sets by workout id
 
@@ -212,7 +213,6 @@ describe('Strongly Endpoints', function(){
     });
 
     //POST exercises
-
     describe('POST /api/exercises', () => {
         const testWorkouts = makeWorkouts();
 
@@ -278,9 +278,8 @@ describe('Strongly Endpoints', function(){
         });
     });
 
-    //TODO: delete exercises
-
-    describe.only('DELETE /api/exercises/exercise_id', () => {
+    //delete exercises
+    describe('DELETE /api/exercises/exercise_id', () => {
         context('Given no exercises', () => {
             it('responds with 404', () => {
                 const exerciseId = 1;

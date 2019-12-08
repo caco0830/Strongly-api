@@ -21,7 +21,7 @@ exercisesRouter
             if(!queries.includes(propName)){
                 return res.status(404).json({
                     error: {message: `${propName} is not a valid query`}
-                })
+                });
             } 
         }
 

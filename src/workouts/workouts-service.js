@@ -7,7 +7,7 @@ const WorkoutsService = {
             .insert(newWorkout)
             .into('strongly_workouts')
             .returning('*')
-            . then(rows => {
+            .then(rows => {
                 return rows[0];
                 
             });
