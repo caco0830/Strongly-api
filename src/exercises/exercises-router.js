@@ -97,6 +97,28 @@ exercisesRouter
             res.status(204).end();
         })
         .catch(next);
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const {title, workout_id} = req.body;
+        const exerciseToUpdate = {title, workout_id};
+
+        const numberOfValues = Object.values(exerciseToUpdate).filter(Boolean).length;
+
+        if(numberOfValues === 0){
+            return res.status(400).json({
+                error: {message: 'Request body must contain a title and workout_id'}
+            });
+        }
+
+        ExercisesService.updateExercise(
+            req.app.get('db'),
+            req.params.exercise_id,
+            exerciseToUpdate
+        )
+        .then(numRowsAffected => {
+            res.status(204).end();
+        })
+        .catch(next);
     });
 
 module.exports = exercisesRouter;

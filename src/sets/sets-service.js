@@ -3,7 +3,7 @@ const SetsService = {
         return knex.select('*').from('strongly_sets');
     },
     getById(knex, id){
-        return knex.select('*').from('strongly_sets').where('id', id).first();
+        return knex.from('strongly_sets').select('*').where('id', id).first();
     },
     getWithQueries(knex, queries){
         return knex
@@ -30,8 +30,12 @@ const SetsService = {
         return knex('strongly_sets')
             .where({id})
             .delete();
+    },
+    updateSet(knex, id, newSetFields){
+        return knex('strongly_sets')
+            .where({id})
+            .update(newSetFields);
     }
-
 }
 
 module.exports = SetsService;

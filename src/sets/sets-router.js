@@ -44,8 +44,8 @@ setsRouter
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const {title, set, rep, exercise_id, weight, workout_id} = req.body;
-        const newSet = {title, set, rep, exercise_id, weight, workout_id};
+        const {set_number, reps, exercise_id, weight, workout_id} = req.body;
+        const newSet = {set_number, reps, exercise_id, weight, workout_id};
 
         for(const [key, value] of Object.entries(newSet)){
             if(value === null){
@@ -69,24 +69,24 @@ setsRouter
 
 setsRouter
     .route('/:set_id')
-    .all((req, res, next) => {
-        ExerciseService.getById(
+    .all((req, res, next) => {  
+        SetsService.getById(
             req.app.get('db'),
             req.params.set_id
         )
-        .then(set => {
-            if(!set){
+        .then(sets => {
+            if(!sets){
                 return res.status(404).json({
                     error: {message: `Set doesn't exist`}
                 });
             }
-            res.set = set;
+            res.sets = sets;
             next();
         })
         .catch(next);
     })
     .get((req, res, next) => {
-        res.json(serializeSets(res.set));
+        res.json(serializeSets(res.sets));
     })
     .delete((req, res, next) => {
         SetsService.deleteSet(
@@ -94,6 +94,30 @@ setsRouter
             req.params.set_id
         )
         .then(() => {
+            res.status(204).end();
+        })
+        .catch(next);
+    })
+    .patch(jsonParser, (req, res, next) => {
+        // const {set_number, reps, exercise_id, weight, workout_id} = req.body;
+        // const setToUpdate = {set_number, reps, exercise_id, weight, workout_id};
+        const {reps, weight} = req.body;
+        const setToUpdate = {reps, weight};
+
+        const numberOfValues = Object.values(setToUpdate).filter(Boolean).length;
+
+        if(numberOfValues === 0){
+            return res.status(400).json({
+                error: {message: 'Request body must contain reps, weight, set_number, exercise_id, workout_id'}
+            });
+        }
+        
+        SetsService.updateSet(
+            req.app.get('db'),
+            req.params.set_id,
+            setToUpdate
+        )
+        .then(numRowsAffected => {
             res.status(204).end();
         })
         .catch(next);

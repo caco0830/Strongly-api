@@ -27,7 +27,13 @@ const ExercisesService = {
         return knex('strongly_exercises')
             .where({id})
             .delete();
+    },
+    updateExercise(knex, id, newExerciseFields){
+        return knex('strongly_exercises')
+            .where({id})
+            .update(newExerciseFields);
     }
+    
 }
 
 module.exports = ExercisesService;

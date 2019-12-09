@@ -23,8 +23,12 @@ const WorkoutsService = {
         return knex('strongly_workouts')
             .where({id})
             .delete();
+    },
+    updateWorkout(knex, id, newWorkoutFields){
+        return knex('strongly_workouts')
+            .where({id})
+            .update(newWorkoutFields);
     }
-
 }
  
 module.exports = WorkoutsService;
