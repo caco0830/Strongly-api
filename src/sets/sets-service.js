@@ -22,7 +22,7 @@ const SetsService = {
             .insert(newSet)
             .into('strongly_sets')
             .returning('*')
-            .then(rows => {
+            .then(rows => { 
                 return rows[0];
             });
     },
