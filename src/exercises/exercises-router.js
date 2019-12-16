@@ -44,20 +44,23 @@ exercisesRouter
         
     })
     .post(jsonParser, (req, res, next) => {
-        const {title, workout_id} = req.body;
-        const newExercise = {title, workout_id}
+        //console.log(req.body);
+        //const [{id, workout_id, title}] = req.body;
+        //const newExercises = [{workout_id, title}];
+        const newExercises = req.body;
+        //console.log(newExercises);
 
-        for(const [key, value] of Object.entries(newExercise)){
-            if(value == null){
-                return res.status(400).json({
-                    error: {message: `Missing '${key}' in request body`}
-                });
-            }
-        }
+        // for(const [key, value] of Object.entries(newExercises)){
+        //     if(value == null){
+        //         return res.status(400).json({
+        //             error: {message: `Missing '${key}' in request body`}
+        //         });
+        //     }
+        // }
 
         ExercisesService.insertExercises(
             req.app.get('db'),
-            newExercise
+            newExercises
         )
         .then(exercise => {
             res

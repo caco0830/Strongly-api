@@ -22,8 +22,8 @@ workoutsRouter
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const {title} = req.body;
-        const newWorkout = {title};
+        const {id, title} = req.body;
+        const newWorkout = {id, title};
 
         for(const [key, value] of Object.entries(newWorkout)){
             if(value == null){

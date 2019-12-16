@@ -7,7 +7,6 @@ const jsonParser = express.json();
 
 const serializeSets = set => ({
     id: set.id,
-    set_number: set.set_number,
     reps: set.reps,
     exercise_id: set.exercise_id,
     weight: set.weight,
@@ -44,16 +43,16 @@ setsRouter
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        const {set_number, reps, exercise_id, weight, workout_id} = req.body;
-        const newSet = {set_number, reps, exercise_id, weight, workout_id};
+        //const {reps, exercise_id, weight, workout_id} = req.body;
+        const newSet = req.body;
 
-        for(const [key, value] of Object.entries(newSet)){
-            if(value === null){
-                return res.status(404).json({
-                    error: {message: `Missing '${key}' in request body`}
-                });
-            }
-        }
+        // for(const [key, value] of Object.entries(newSet)){
+        //     if(value === null){
+        //         return res.status(404).json({
+        //             error: {message: `Missing '${key}' in request body`}
+        //         });
+        //     }
+        // }
 
         SetsService.insertSet(
             req.app.get('db'),
@@ -99,8 +98,6 @@ setsRouter
         .catch(next);
     })
     .patch(jsonParser, (req, res, next) => {
-        // const {set_number, reps, exercise_id, weight, workout_id} = req.body;
-        // const setToUpdate = {set_number, reps, exercise_id, weight, workout_id};
         const {reps, weight} = req.body;
         const setToUpdate = {reps, weight};
 
