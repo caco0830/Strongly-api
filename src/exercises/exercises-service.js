@@ -4,7 +4,7 @@ const ExercisesService = {
     },
     getExercisesByWorkoutId(knex, workoutId){
         //console.log(workoutId)
-        return knex.select('*').from('strongly_exercises').where('workout_id', parseInt(workoutId));
+        return knex.select('*').from('strongly_exercises').where('workout_id', workoutId);
     },
     getById(knex, id){
         return knex
