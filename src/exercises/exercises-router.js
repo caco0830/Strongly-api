@@ -68,6 +68,20 @@ exercisesRouter
                 .json(serializeExercises(exercise));
         })
         .catch(next);
+    })
+    .patch(jsonParser,(req, res, next) => {
+        const newSet = req.body;
+        console.log(newSet);
+
+
+        ExercisesService.updateMultiExercises(
+            req.app.get('db'),
+            newSet
+        )
+        // .then(numRowsAffected => {
+        //     res.status(204).end();
+        // })
+        // .catch(next);
     });
 
 exercisesRouter

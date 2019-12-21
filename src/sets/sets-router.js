@@ -65,6 +65,18 @@ setsRouter
         })
         .catch(next);
     })
+    .patch(jsonParser,(req, res, next) => {
+        const newSet = req.body;
+
+        SetsService.updateMultiSets(
+            req.app.get('db'),
+            req.body
+        )
+        .then(numRowsAffected => {
+            res.status(204).end();
+        })
+        .catch(next); 
+    });
 
 setsRouter
     .route('/:set_id')

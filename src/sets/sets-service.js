@@ -35,6 +35,13 @@ const SetsService = {
         return knex('strongly_sets')
             .where({id})
             .update(newSetFields);
+    },
+    updateMultiSets(knex, newSets){
+        newSets.map(set => 
+            knex('strongly_sets')
+            .where('id', set.id)
+            .update(set)
+        );
     }
 }
 

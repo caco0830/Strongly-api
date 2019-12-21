@@ -4,5 +4,6 @@ CREATE TABLE strongly_sets(
     weight INTEGER NOT NULL,
     reps INTEGER NOT NULL,
     exercise_id UUID REFERENCES strongly_exercises(id) ON DELETE CASCADE NOT NULL,
-    workout_id UUID REFERENCES strongly_workouts(id) ON DELETE CASCADE NOT NULL
+    workout_id UUID REFERENCES strongly_workouts(id) ON DELETE CASCADE NOT NULL,
+    createdDate TIMESTAMP DEFAULT now() NOT NULL
 );

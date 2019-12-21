@@ -32,6 +32,20 @@ const ExercisesService = {
         return knex('strongly_exercises')
             .where({id})
             .update(newExerciseFields);
+    },
+    updateMultiExercises(knex, newExercises){
+        //console.log('updating')
+        return newExercises.map(ex => {
+            //console.log(ex)
+            const {id, workout_id, title} = ex;
+            const newEx = {title, workout_id};
+            //console.log(newEx)
+
+            return knex('strongly_exercises')
+            .where('id', ex.id)
+            .update(newEx)
+            .returning('*')
+        });
     }
     
 }
