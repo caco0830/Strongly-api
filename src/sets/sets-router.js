@@ -1,6 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const SetsService = require('./sets-service');
+const {requireAuth} = require('../middleware/basic-auth');
 
 const setsRouter = express.Router();
 const jsonParser = express.json();
@@ -15,6 +16,7 @@ const serializeSets = set => ({
 
 setsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const queries = ['exercise_id', 'workout_id'];
         const knexInstance = req.app.get('db');
@@ -42,7 +44,7 @@ setsRouter
             })
             .catch(next);
     })
-    .post(jsonParser, (req, res, next) => {
+    .post(requireAuth, jsonParser, (req, res, next) => {
         //const {reps, exercise_id, weight, workout_id} = req.body;
         const newSet = req.body;
 
@@ -65,7 +67,7 @@ setsRouter
         })
         .catch(next);
     })
-    .patch(jsonParser,(req, res, next) => {
+    .patch(requireAuth, jsonParser,(req, res, next) => {
         const newSet = req.body;
 
         SetsService.updateMultiSets(
@@ -80,6 +82,7 @@ setsRouter
 
 setsRouter
     .route('/:set_id')
+    .all(requireAuth)
     .all((req, res, next) => {  
         SetsService.getById(
             req.app.get('db'),
@@ -99,7 +102,7 @@ setsRouter
     .get((req, res, next) => {
         res.json(serializeSets(res.sets));
     })
-    .delete((req, res, next) => {
+    .delete(requireAuth, (req, res, next) => {
         SetsService.deleteSet(
             req.app.get('db'),
             req.params.set_id
@@ -109,7 +112,7 @@ setsRouter
         })
         .catch(next);
     })
-    .patch(jsonParser, (req, res, next) => {
+    .patch(requireAuth, jsonParser, (req, res, next) => {
         const {reps, weight} = req.body;
         const setToUpdate = {reps, weight};
 

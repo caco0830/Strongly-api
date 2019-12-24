@@ -1,6 +1,7 @@
 const express = require('express');
 const xss = require('xss');
 const WorkoutsService = require('./workouts-service');
+const {requireAuth} = require('../middleware/basic-auth');
 
 const workoutsRouter = express.Router();
 const jsonParser = express.json();
@@ -13,6 +14,7 @@ const serializeWorkout = workout => ({
 
 workoutsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db');
         WorkoutsService.getAllWorkouts(knexInstance)
@@ -47,6 +49,7 @@ workoutsRouter
 
     workoutsRouter
         .route('/:workout_id')
+        .all(requireAuth)
         .all((req, res, next) => {
             WorkoutsService.getById(
                 req.app.get('db'),

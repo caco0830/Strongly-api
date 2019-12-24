@@ -1,6 +1,7 @@
 const express =  require('express');
 const xss = require('xss');
 const ExercisesService = require('./exercises-service');
+const {requireAuth} = require('../middleware/basic-auth');
 
 const exercisesRouter = express.Router();
 const jsonParser = express.json();
@@ -13,6 +14,7 @@ const serializeExercises = exercise => ({
 
 exercisesRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const queries = ['workout_id'];
         const knexInstance = req.app.get('db');
@@ -43,7 +45,7 @@ exercisesRouter
         }
         
     })
-    .post(jsonParser, (req, res, next) => {
+    .post(requireAuth, jsonParser, (req, res, next) => {
         //console.log(req.body);
         //const [{id, workout_id, title}] = req.body;
         //const newExercises = [{workout_id, title}];
@@ -69,7 +71,7 @@ exercisesRouter
         })
         .catch(next);
     })
-    .patch(jsonParser,(req, res, next) => {
+    .patch(requireAuth, jsonParser,(req, res, next) => {
         const newSet = req.body;
         console.log(newSet);
 
@@ -86,6 +88,7 @@ exercisesRouter
 
 exercisesRouter
     .route('/:exercise_id')
+    .all(requireAuth)
     .all((req, res, next) => {
         ExercisesService.getById(
             req.app.get('db'),
@@ -105,7 +108,7 @@ exercisesRouter
     .get((req, res, next) => {
         res.json(serializeExercises(res.exercise));
     })
-    .delete((req, res, next) => {
+    .delete(requireAuth, (req, res, next) => {
         ExercisesService.deleteExercise(
             req.app.get('db'),
             req.params.exercise_id
@@ -115,7 +118,7 @@ exercisesRouter
         })
         .catch(next);
     })
-    .patch(jsonParser, (req, res, next) => {
+    .patch(requireAuth, jsonParser, (req, res, next) => {
         const {title, workout_id} = req.body;
         const exerciseToUpdate = {title, workout_id};
 
