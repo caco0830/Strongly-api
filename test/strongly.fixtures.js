@@ -1,22 +1,24 @@
 function makeWorkouts() {
     return [
         {
-            "id": 1,
+            "db_id": 1,
+            "id": "ce1f061c-1ca7-4f82-81c8-476f08eaa51d",
             "title": "Morning Workout",
             "createddate": "2019-11-06T05:55:06.943Z",
         },
         {
-            "id": 2,
+            "db_id": 2,
+            "id": "4d1ef4ba-91e1-430b-b049-438c70646a30",
             "title": "Afternoon Workout",
             "createddate": "2019-11-06T05:55:06.943Z",
         },
         {
-            "id": 3,
+            "db_id": 3,
+            "id": "a24682c1-0f97-4866-ae24-ba09ea4e2b81",
             "title": "Late Night Workout",
             "createddate": "2019-11-06T05:55:06.943Z",
         }
     ];
-
 }
 
 function makeExercises() {

@@ -2,7 +2,7 @@ const knex = require('knex');
 const app = require('../app');
 const {makeWorkouts, makeExercises, makeSets} = require('./strongly.fixtures');
 
-describe('Workouts Endpoints', function(){
+describe.only('Workouts Endpoints', function(){
     let db;
 
     before('make knex instance', () => {
@@ -48,7 +48,7 @@ describe('Workouts Endpoints', function(){
     describe('GET /api/workouts/workout_id', () => {
         context('Given no workouts', () => {
             it('responds with 404', () => {
-                const workoutId = 234;
+                const workoutId = '66b59caa-f492-4719-b98c-ac6569fd217c';
                 return supertest(app)
                     .get(`/api/workouts/${workoutId}`)
                     .expect(404, {error: {message: `Workout doesn't exist`}});
@@ -65,20 +65,21 @@ describe('Workouts Endpoints', function(){
             });
 
             it('responds with 200 and the specified workout', () => {
-                const workoutId = 2;
-                const expectedWorkout = testWorkouts[workoutId-1];
+                const workoutId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
+                const expectedWorkout = testWorkouts.filter(workout => {
+                    return workout.id === workoutId;
+                });
                 return supertest(app)
                     .get(`/api/workouts/${workoutId}`)
-                    .expect(200, expectedWorkout);
+                    .expect(200, expectedWorkout[0]);
             });
-
-
         });
     });
 
     describe('POST /api/workouts', () => {
         it('creates workout, responding with 201 and new workout', () => {
             const newWorkout = {
+                id: 'bcaad68c-b859-4757-b649-ca87aad08e49',
                 title: 'Test Workout'
             }
 
@@ -97,7 +98,7 @@ describe('Workouts Endpoints', function(){
     describe('PATCH /api/workouts/:workout_id', () => {
         context('Given no workouts', () => {
             it('responds with 404', () => {
-                const workoutId = 1;
+                const workoutId = 'bcaad68c-b859-4757-b649-ca87aad08e49';
                 return supertest(app)
                     .patch(`/api/workouts/${workoutId}`)
                     .expect(404, {error: {message: `Workout doesn't exist`}});
@@ -106,6 +107,7 @@ describe('Workouts Endpoints', function(){
 
         context('Given there are workouts in the database', () => {
             const testWorkouts = makeWorkouts();
+            
 
             beforeEach('insert data', () => {
                 return db
@@ -114,13 +116,16 @@ describe('Workouts Endpoints', function(){
             });
 
             it('responds with 204 and the updated workout', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 const updateWorkout = {
                     title: 'updated title'
                 }
+                const testWorkout = testWorkouts.filter(workout => {
+                    return workout.id === idToUpdate;
+                });
 
                 const expectedWorkouts = {
-                    ...testWorkouts[idToUpdate - 1],
+                    ...testWorkout[0],
                     ...updateWorkout
                 }
 
@@ -136,7 +141,7 @@ describe('Workouts Endpoints', function(){
             });
 
             it('responds with 400 when no requiered fields supplied', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 return supertest(app)
                     .patch(`/api/workouts/${idToUpdate}`)
                     .send({noField: 'none'})
@@ -146,13 +151,16 @@ describe('Workouts Endpoints', function(){
             });
 
             it('responds with 204 when updating only a subset of fields', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 const updateWorkout = {
                     title: 'updated title'
                 }
+                const testWorkout = testWorkouts.filter(workout => {
+                    return workout.id === idToUpdate;
+                });
 
                 const expectedWorkouts = {
-                    ...testWorkouts[idToUpdate - 1],
+                    ...testWorkout[0],
                     ...updateWorkout
                 }
 
@@ -175,7 +183,7 @@ describe('Workouts Endpoints', function(){
     describe('DELETE /api/workouts/workout_id', () => {
         context('Given no workouts', () => {
             it('responds with 404', () => {
-                const workoutId = 123;
+                const workoutId = 'bcaad68c-b859-4757-b649-ca87aad08e49';
                 return supertest(app)
                     .delete(`/api/workouts/${workoutId}`)
                     .expect(404, {error: {message: `Workout doesn't exist`}});
@@ -192,7 +200,7 @@ describe('Workouts Endpoints', function(){
             });
 
             it('responds with 204 and deletes the workout', () => {
-                const workoutId = 2;
+                const workoutId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 const expectedWorkouts = testWorkouts.filter(workout => workout.id !== workoutId);
 
                 return supertest(app)
