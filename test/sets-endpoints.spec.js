@@ -277,7 +277,6 @@ describe('Strongly Endpoints', function(){
                     weight: 140
                 }
 
-
                 const expectedSets = {
                     ...testSet[0],
                     ...updateSet
