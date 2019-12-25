@@ -1,6 +1,6 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises, makeSets} = require('./strongly.fixtures');
+const {makeWorkouts, makeExercises} = require('./strongly.fixtures');
 
 describe('Strongly Endpoints', function(){
     let db;
@@ -53,7 +53,7 @@ describe('Strongly Endpoints', function(){
 
     //get exercises by workout id
     describe('GET /api/exercises?workout_id=workout_id', () => {
-        const workoutId = 1;
+        const workoutId = "ce1f061c-1ca7-4f82-81c8-476f08eaa511";
         context('Given no exercises', () => {
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
@@ -107,7 +107,8 @@ describe('Strongly Endpoints', function(){
 
         it('creates an exercise, responds with 201 and the new exercise', () => {
             const newExercise = {
-                workout_id : 1,
+                id: 'd3b68775-1a24-40a1-a8ef-5dc946f773fc',
+                workout_id : 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d',
                 title: 'New'
             }
 
@@ -126,7 +127,7 @@ describe('Strongly Endpoints', function(){
     describe('PATCH /api/exercises/:exercise_id', () => {
         context('Given no exercises', () => {
             it('responds with 404', () => {
-                const exerciseId = 1;
+                const exerciseId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 return supertest(app)
                     .patch(`/api/exercises/${exerciseId}`)
                     .expect(404, {error: {message: `Exercise doesn't exist`}});
@@ -149,14 +150,18 @@ describe('Strongly Endpoints', function(){
              });
 
             it('responds with 204 and the updated exercise', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 const updateExercise = {
                     title: 'updated title',
-                    workout_id: 1
+                    workout_id: 'a24682c1-0f97-4866-ae24-ba09ea4e2b81'
                 }
+                
+                const testExercise = testExercises.filter(ex => {
+                    return ex.id === idToUpdate;
+                })
 
                 const expectedExercises = {
-                    ...testExercises[idToUpdate - 1],
+                    ...testExercise[0],
                     ...updateExercise
                 }
 
@@ -171,24 +176,28 @@ describe('Strongly Endpoints', function(){
                         );
             });
 
-            it('responds with 400 when no requiered fields supplied', () => {
-                const idToUpdate = 2;
+            it('responds with 400 when no required fields supplied', () => {
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 return supertest(app)
                     .patch(`/api/exercises/${idToUpdate}`)
                     .send({noField: 'none'})
                     .expect(400, {
-                        error: {message: 'Request body must contain a title and workout_id'}
+                        error: {message: 'Request body must contain an id, title and workout_id'}
                     });
             });
 
             it('responds with 204 when updating only a subset of fields', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 const updateExercise = {
                     title: 'updated title'
                 }
 
+                const testExercise = testExercises.filter(ex => {
+                    return ex.id === idToUpdate;
+                })
+
                 const expectedExercises = {
-                    ...testExercises[idToUpdate - 1],
+                    ...testExercise[0],
                     ...updateExercise
                 }
 
@@ -212,7 +221,7 @@ describe('Strongly Endpoints', function(){
     describe('DELETE /api/exercises/exercise_id', () => {
         context('Given no exercises', () => {
             it('responds with 404', () => {
-                const exerciseId = 1;
+                const exerciseId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 return supertest(app)
                     .delete(`/api/exercises/${exerciseId}`)
                     .expect(404, {error: {message: `Exercise doesn't exist`}});
@@ -235,7 +244,7 @@ describe('Strongly Endpoints', function(){
              });
 
              it('responds with 204 and deletes the exercise', () => {
-                 const exerciseId = 1;
+                 const exerciseId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                  const expectedExercises = testExercises.filter(exercise => exercise.id !== exerciseId);
 
                  return supertest(app)

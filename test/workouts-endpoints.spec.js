@@ -1,8 +1,8 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises, makeSets} = require('./strongly.fixtures');
+const {makeWorkouts} = require('./strongly.fixtures');
 
-describe.only('Workouts Endpoints', function(){
+describe('Workouts Endpoints', function(){
     let db;
 
     before('make knex instance', () => {

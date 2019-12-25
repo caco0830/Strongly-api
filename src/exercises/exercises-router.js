@@ -7,6 +7,7 @@ const exercisesRouter = express.Router();
 const jsonParser = express.json();
 
 const serializeExercises = exercise => ({
+    db_id: exercise.db_id,
     id: exercise.id,
     workout_id: exercise.workout_id,
     title: xss(exercise.title)
@@ -41,9 +42,7 @@ exercisesRouter
                     res.json(exercises.map(serializeExercises))
                 })
                 .catch(next);
-            
         }
-        
     })
     .post(requireAuth, jsonParser, (req, res, next) => {
         //console.log(req.body);
@@ -119,14 +118,14 @@ exercisesRouter
         .catch(next);
     })
     .patch(requireAuth, jsonParser, (req, res, next) => {
-        const {title, workout_id} = req.body;
-        const exerciseToUpdate = {title, workout_id};
+        const {id, title, workout_id} = req.body;
+        const exerciseToUpdate = {id, title, workout_id};
 
         const numberOfValues = Object.values(exerciseToUpdate).filter(Boolean).length;
 
         if(numberOfValues === 0){
             return res.status(400).json({
-                error: {message: 'Request body must contain a title and workout_id'}
+                error: {message: 'Request body must contain an id, title and workout_id'}
             });
         }
 

@@ -7,6 +7,7 @@ const setsRouter = express.Router();
 const jsonParser = express.json();
 
 const serializeSets = set => ({
+    db_id:set.db_id,
     id: set.id,
     reps: set.reps,
     exercise_id: set.exercise_id,

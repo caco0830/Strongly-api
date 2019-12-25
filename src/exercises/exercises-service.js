@@ -3,7 +3,6 @@ const ExercisesService = {
         return knex.select('*').from('strongly_exercises');
     },
     getExercisesByWorkoutId(knex, workoutId){
-        //console.log(workoutId)
         return knex.select('*').from('strongly_exercises').where('workout_id', workoutId);
     },
     getById(knex, id){
@@ -12,7 +11,6 @@ const ExercisesService = {
             .select('*')
             .where('id', id)
             .first();
-
     },
     insertExercises(knex, newExercise){
         return knex
@@ -34,12 +32,9 @@ const ExercisesService = {
             .update(newExerciseFields);
     },
     updateMultiExercises(knex, newExercises){
-        //console.log('updating')
         return newExercises.map(ex => {
-            //console.log(ex)
             const {id, workout_id, title} = ex;
             const newEx = {title, workout_id};
-            //console.log(newEx)
 
             return knex('strongly_exercises')
             .where('id', ex.id)
@@ -47,7 +42,6 @@ const ExercisesService = {
             .returning('*')
         });
     }
-    
 }
 
 module.exports = ExercisesService;
