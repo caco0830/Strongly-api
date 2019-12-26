@@ -101,8 +101,40 @@ function makeSets() {
     ];
 }
 
+function makeUsers() {
+    return [
+        {
+            id: 1,
+            username: 'test-user-1',
+            fullname: 'Test user 1',
+            nickname: 'TU1',
+            password: 'password',
+            date_created: new Date('2029-01-22T16:28:32.615Z'),
+          },
+          {
+            id: 2,
+            username: 'test-user-2',
+            fullname: 'Test user 2',
+            nickname: 'TU2',
+            password: 'password',
+            date_created: new Date('2029-01-22T16:28:32.616Z'),
+          },
+    ];
+}
+
+function makeWorkoutFixtures() {
+    const testUsers = makeUsers();
+    const testWorkouts = makeWorkouts();
+    const testExercises = makeExercises();
+    const testSets = makeSets();
+
+    return {testUsers, testWorkouts, testExercises, testSets}
+}
+
 module.exports = {
     makeWorkouts,
     makeExercises,
-    makeSets
+    makeSets,
+    makeUsers,
+    makeWorkoutFixtures
 }

@@ -1,9 +1,16 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises} = require('./strongly.fixtures');
+const {makeWorkouts, makeExercises, makeWorkoutFixtures} = require('./strongly.fixtures');
 
 describe('Strongly Endpoints', function(){
     let db;
+
+    const {testUsers, testWorkouts, testExercises, testSets} = makeWorkoutFixtures();
+
+    function makeAuthHeader(user){
+        const token = Buffer.from(`${user.username}:${user.password}`).toString('base64');
+        return `Basic ${token}`;
+    }
 
     before('make knex instance', () => {
         db = knex({
@@ -24,6 +31,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/exercises')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
@@ -46,6 +54,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and all of the exercises', () => {
                 return supertest(app)
                     .get('/api/exercises')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, testExercises);
             });
         });
@@ -58,6 +67,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get(`/api/exercises?workout_id=${workoutId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
@@ -81,6 +91,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and all of the exercises', () => {
                 return supertest(app)
                     .get(`/api/exercises?workout_id=${workoutId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, expectedExercises);
             });
         });
@@ -90,6 +101,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 404', () => {
                 return supertest(app)
                     .get(`/api/exercises?invalid=123`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `invalid is not a valid query`}});
             });
         });
@@ -115,6 +127,7 @@ describe('Strongly Endpoints', function(){
             return supertest(app)
                 .post('/api/exercises')
                 .send(newExercise)
+                .set('Authorization', makeAuthHeader(testUsers[0]))
                 .expect(201)
                 .expect(res => {
                     expect(res.body.title).to.eql(newExercise.title);
@@ -130,6 +143,7 @@ describe('Strongly Endpoints', function(){
                 const exerciseId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
                 return supertest(app)
                     .patch(`/api/exercises/${exerciseId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Exercise doesn't exist`}});
             });
         });
@@ -168,10 +182,12 @@ describe('Strongly Endpoints', function(){
                 return supertest(app)
                     .patch(`/api/exercises/${idToUpdate}`)
                     .send(updateExercise)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/exercises/${idToUpdate}`)
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedExercises)
                         );
             });
@@ -180,6 +196,7 @@ describe('Strongly Endpoints', function(){
                 const idToUpdate = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 return supertest(app)
                     .patch(`/api/exercises/${idToUpdate}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send({noField: 'none'})
                     .expect(400, {
                         error: {message: 'Request body must contain an id, title and workout_id'}
@@ -207,10 +224,12 @@ describe('Strongly Endpoints', function(){
                         ...updateExercise,
                         fieldToIgnore: 'should not be in response'
                     })
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/exercises/${idToUpdate}`)
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedExercises)
                         );
             });
@@ -224,6 +243,7 @@ describe('Strongly Endpoints', function(){
                 const exerciseId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa511';
                 return supertest(app)
                     .delete(`/api/exercises/${exerciseId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Exercise doesn't exist`}});
             });
         });
@@ -249,10 +269,12 @@ describe('Strongly Endpoints', function(){
 
                  return supertest(app)
                     .delete(`/api/exercises/${exerciseId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get('/api/exercises')
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedExercises)
                     );
              });

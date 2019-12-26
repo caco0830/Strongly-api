@@ -45,9 +45,13 @@ setsRouter
             })
             .catch(next);
     })
-    .post(requireAuth, jsonParser, (req, res, next) => {
+    .post(jsonParser, (req, res, next) => {
         //const {reps, exercise_id, weight, workout_id} = req.body;
         const newSet = req.body;
+
+        newSet.forEach(s => {
+            s.user_id = req.user.id;
+        });
 
         // for(const [key, value] of Object.entries(newSet)){
         //     if(value === null){
@@ -68,7 +72,7 @@ setsRouter
         })
         .catch(next);
     })
-    .patch(requireAuth, jsonParser,(req, res, next) => {
+    .patch(jsonParser,(req, res, next) => {
         const newSet = req.body;
 
         SetsService.updateMultiSets(

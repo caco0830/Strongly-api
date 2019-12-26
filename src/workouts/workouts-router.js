@@ -35,6 +35,7 @@ workoutsRouter
                 });
             }
         }
+        newWorkout.user_id = req.user.id;
 
         WorkoutsService.insertWorkouts(
             req.app.get('db'),
@@ -80,7 +81,8 @@ workoutsRouter
             })
             .catch(next);
     })
-    .patch(jsonParser, (req, res, next) => {
+    .patch(requireAuth, jsonParser, (req, res, next) => {
+        console.log('patching')
         const { title } = req.body;
         const workoutToUpdate = { title };
 

@@ -1,9 +1,16 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises, makeSets} = require('./strongly.fixtures');
+const {makeWorkouts, makeExercises, makeSets, makeWorkoutFixtures} = require('./strongly.fixtures');
 
 describe('Strongly Endpoints', function(){
     let db;
+
+    const {testUsers, testWorkouts, testExercises, testSets} = makeWorkoutFixtures();
+
+    function makeAuthHeader(user){
+        const token = Buffer.from(`${user.username}:${user.password}`).toString('base64');
+        return `Basic ${token}`;
+    }
 
     before('make knex instance', () => {
         db = knex({
@@ -24,6 +31,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/sets')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
@@ -52,6 +60,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get('/api/sets')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, testSets);
             });
         });
@@ -63,6 +72,7 @@ describe('Strongly Endpoints', function(){
                 const SetId = 'bec25c08-1e91-4fa9-a6c7-9ed3c44bf385';
                 return supertest(app)
                     .get(`/api/sets/${SetId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
@@ -93,6 +103,7 @@ describe('Strongly Endpoints', function(){
                 const expectedSet = testSets[0];
                 return supertest(app)
                     .get(`/api/sets/${setId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, expectedSet);
             });
         });
@@ -105,6 +116,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get(`/api/sets?exercise_id=${exerciseId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
@@ -134,6 +146,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get(`/api/sets?exercise_id=${exerciseId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(expectedSets);
             });
         });
@@ -142,6 +155,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 404', () => {
                 return supertest(app)
                     .get('/api/sets?invalid=no')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: 'invalid is not a valid query'}});
             });
         });
@@ -154,6 +168,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get(`/api/sets?workout_id=${workoutId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
@@ -183,6 +198,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get(`/api/sets?workout_id=${workoutId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(expectedSets);
             });
         });
@@ -191,6 +207,7 @@ describe('Strongly Endpoints', function(){
             it('responds with 404', () => {
                 return supertest(app)
                     .get('/api/sets?invalid=no')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: 'invalid is not a valid query'}});
             });
         });
@@ -224,6 +241,7 @@ describe('Strongly Endpoints', function(){
             return supertest(app)
                 .post('/api/sets')
                 .send(newSet)
+                .set('Authorization', makeAuthHeader(testUsers[0]))
                 .expect(201)
                 .expect(res => {
                     expect(res.body.reps).to.eql(newSet.reps);
@@ -242,6 +260,7 @@ describe('Strongly Endpoints', function(){
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
                 return supertest(app)
                     .patch(`/api/sets/${setId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
@@ -285,10 +304,12 @@ describe('Strongly Endpoints', function(){
                 return supertest(app)
                     .patch(`/api/sets/${idToUpdate}`)
                     .send(updateSet)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/sets/${idToUpdate}`)
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });
@@ -298,6 +319,7 @@ describe('Strongly Endpoints', function(){
                 return supertest(app)
                     .patch(`/api/sets/${idToUpdate}`)
                     .send({noField: 'none'})
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(400, {
                         error: {message: 'Request body must contain reps, weight, set_number, exercise_id, workout_id'}
                     });
@@ -323,10 +345,12 @@ describe('Strongly Endpoints', function(){
                         ...updateSet,
                         fieldToIgnore: 'should not be in response'
                     })
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/sets/${idToUpdate}`)
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });
@@ -340,6 +364,7 @@ describe('Strongly Endpoints', function(){
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
                 return supertest(app)
                     .delete(`/api/sets/${setId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
@@ -371,10 +396,12 @@ describe('Strongly Endpoints', function(){
 
                 return supertest(app)
                     .delete(`/api/sets/${setId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get('/api/sets')
+                        .set('Authorization', makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });

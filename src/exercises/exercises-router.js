@@ -49,7 +49,10 @@ exercisesRouter
         //const [{id, workout_id, title}] = req.body;
         //const newExercises = [{workout_id, title}];
         const newExercises = req.body;
-        //console.log(newExercises);
+
+        newExercises.forEach(ex => {
+            ex.user_id = req.user.id;
+        });
 
         // for(const [key, value] of Object.entries(newExercises)){
         //     if(value == null){
@@ -58,6 +61,8 @@ exercisesRouter
         //         });
         //     }
         // }
+
+        
 
         ExercisesService.insertExercises(
             req.app.get('db'),
