@@ -6,3 +6,5 @@ ALTER TABLE strongly_exercises
 
 ALTER TABLE strongly_sets
     DROP COLUMN IF EXISTS user_id;
+
+DROP TABLE IF EXISTS strongly_users;

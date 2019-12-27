@@ -46,20 +46,15 @@ setsRouter
             .catch(next);
     })
     .post(jsonParser, (req, res, next) => {
-        //const {reps, exercise_id, weight, workout_id} = req.body;
         const newSet = req.body;
 
-        newSet.forEach(s => {
-            s.user_id = req.user.id;
-        });
-
-        // for(const [key, value] of Object.entries(newSet)){
-        //     if(value === null){
-        //         return res.status(404).json({
-        //             error: {message: `Missing '${key}' in request body`}
-        //         });
-        //     }
-        // }
+        if(!newSet[0]){
+            newSet.user_id = req.user.id;
+        }else{
+            newSet.forEach(s => {
+                s.user_id = req.user.id;
+            });
+        }
 
         SetsService.insertSet(
             req.app.get('db'),

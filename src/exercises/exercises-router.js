@@ -48,9 +48,13 @@ exercisesRouter
         
         const newExercises = req.body;
 
-        newExercises.forEach(ex => {
-            ex.user_id = req.user.id;
-        });        
+        if(!newExercises[0]){
+            newExercises.user_id = req.user.id;
+        }else{
+            newExercises.forEach(ex => {
+                ex.user_id = req.user.id;
+            });
+        }
 
         ExercisesService.insertExercises(
             req.app.get('db'),

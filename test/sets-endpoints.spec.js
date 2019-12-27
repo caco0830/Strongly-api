@@ -1,16 +1,12 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises, makeSets, makeWorkoutFixtures} = require('./strongly.fixtures');
+const {makeWorkoutFixtures} = require('./strongly.fixtures');
+const helpers = require('./test-helpers');
 
 describe('Strongly Endpoints', function(){
     let db;
 
     const {testUsers, testWorkouts, testExercises, testSets} = makeWorkoutFixtures();
-
-    function makeAuthHeader(user){
-        const token = Buffer.from(`${user.username}:${user.password}`).toString('base64');
-        return `Basic ${token}`;
-    }
 
     before('make knex instance', () => {
         db = knex({
@@ -22,45 +18,41 @@ describe('Strongly Endpoints', function(){
 
     after('disconnect from db', () => db.destroy());
 
-    before('clean the table', () => db.raw('TRUNCATE strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
+    before('clean the table', () => db.raw('TRUNCATE strongly_users, strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
 
-    afterEach('cleanup', () => db.raw('TRUNCATE strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
-   
+    afterEach('cleanup', () => db.raw('TRUNCATE strongly_users, strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
+    
     describe('GET /api/sets', () => {
         context('Given no sets', () => {
+
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
+
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/sets')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
 
         context('Given there are sets in the database', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
-
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                               return db
-                                    .into('strongly_sets') 
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get('/api/sets')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, testSets);
             });
         });
@@ -68,42 +60,35 @@ describe('Strongly Endpoints', function(){
 
     describe('GET /api/sets/sets_id', () => {
         context('Given no sets', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 404', () => {
                 const SetId = 'bec25c08-1e91-4fa9-a6c7-9ed3c44bf385';
                 return supertest(app)
                     .get(`/api/sets/${SetId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
 
         context('Given there are sets', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
-
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                               return db
-                                    .into('strongly_sets') 
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 200 and the specified set', () => {
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
                 const expectedSet = testSets[0];
                 return supertest(app)
                     .get(`/api/sets/${setId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, expectedSet);
             });
         });
@@ -113,49 +98,47 @@ describe('Strongly Endpoints', function(){
     describe('GET /api/sets?exercise_id=exercise_id', () => {
         const exerciseId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
         context('Given no sets', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
+            
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get(`/api/sets?exercise_id=${exerciseId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
 
         context('Given there are sets for exercise in query', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
             const expectedSets = testSets.filter(s => {return s.exercise_id === exerciseId});
 
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                                return db 
-                                    .into('strongly_sets')
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get(`/api/sets?exercise_id=${exerciseId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(expectedSets);
             });
         });
 
         context('Given an invalid query', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 404', () => {
                 return supertest(app)
                     .get('/api/sets?invalid=no')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: 'invalid is not a valid query'}});
             });
         });
@@ -165,49 +148,46 @@ describe('Strongly Endpoints', function(){
     describe('GET /api/sets?workout_id=workout_id', () => {
         const workoutId = 'ce1f061c-1ca7-4f82-81c8-476f08eaa51d';
         context('Given no sets', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get(`/api/sets?workout_id=${workoutId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, []);
             });
         });
 
         context('Given there are sets for workout in query', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
             const expectedSets = testSets.filter(s => {return s.workout_id === workoutId});
 
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                                return db 
-                                    .into('strongly_sets')
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 200 and a list of sets', () => {
                 return supertest(app)
                     .get(`/api/sets?workout_id=${workoutId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(expectedSets);
             });
         });
 
         context('Given an invalid query', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 404', () => {
                 return supertest(app)
                     .get('/api/sets?invalid=no')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: 'invalid is not a valid query'}});
             });
         });
@@ -215,19 +195,16 @@ describe('Strongly Endpoints', function(){
   
     //POST sets
     describe('POST /api/sets', () => {
-        const testWorkouts = makeWorkouts();
-        const testExercises = makeExercises();
 
-        beforeEach('insert data', () => {
-            return db
-                .into('strongly_workouts')
-                .insert(testWorkouts)
-                .then(() => {
-                    return db
-                        .into('strongly_exercises')
-                        .insert(testExercises);
-                });
-        });
+        beforeEach('insert workouts', () => 
+            helpers.seedWorkoutTables(
+                db,
+                testUsers,
+                testWorkouts,
+                testExercises,
+                testSets,
+            )
+        );
 
         it('it creates set, responding with 201 and new set', () => {
             const newSet = {
@@ -241,7 +218,7 @@ describe('Strongly Endpoints', function(){
             return supertest(app)
                 .post('/api/sets')
                 .send(newSet)
-                .set('Authorization', makeAuthHeader(testUsers[0]))
+                .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                 .expect(201)
                 .expect(res => {
                     expect(res.body.reps).to.eql(newSet.reps);
@@ -256,35 +233,28 @@ describe('Strongly Endpoints', function(){
     //update sets
     describe('PATCH /api/sets/:set_id', () => {
         context('Given no sets', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 404', () => {
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
                 return supertest(app)
                     .patch(`/api/sets/${setId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
 
         context('Given there are sets in the database', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
-
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                               return db
-                                    .into('strongly_sets') 
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 204 and the updated set', () => {
                 const idToUpdate = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
@@ -304,12 +274,12 @@ describe('Strongly Endpoints', function(){
                 return supertest(app)
                     .patch(`/api/sets/${idToUpdate}`)
                     .send(updateSet)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/sets/${idToUpdate}`)
-                        .set('Authorization', makeAuthHeader(testUsers[0]))
+                        .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });
@@ -319,7 +289,7 @@ describe('Strongly Endpoints', function(){
                 return supertest(app)
                     .patch(`/api/sets/${idToUpdate}`)
                     .send({noField: 'none'})
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(400, {
                         error: {message: 'Request body must contain reps, weight, set_number, exercise_id, workout_id'}
                     });
@@ -345,12 +315,12 @@ describe('Strongly Endpoints', function(){
                         ...updateSet,
                         fieldToIgnore: 'should not be in response'
                     })
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get(`/api/sets/${idToUpdate}`)
-                        .set('Authorization', makeAuthHeader(testUsers[0]))
+                        .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });
@@ -360,35 +330,28 @@ describe('Strongly Endpoints', function(){
     //delete sets
     describe('DELETE /api/sets/set_id', () => {
         context('Given no sets', () => {
+            beforeEach(() =>
+                helpers.seedUsers(db, testUsers)
+            );
             it('responds with 404', () => {
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
                 return supertest(app)
                     .delete(`/api/sets/${setId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Set doesn't exist`}});
             });
         });
 
         context('Given there are sets', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
-            const testSets = makeSets();
-
-            beforeEach('insert data', () => {
-                return db
-                    .into('strongly_workouts')
-                    .insert(testWorkouts)
-                    .then(() => {
-                        return db
-                            .into('strongly_exercises')
-                            .insert(testExercises)
-                            .then(() => {
-                               return db
-                                    .into('strongly_sets') 
-                                    .insert(testSets);
-                            });
-                    });
-            });
+            beforeEach('insert workouts', () => 
+                helpers.seedWorkoutTables(
+                    db,
+                    testUsers,
+                    testWorkouts,
+                    testExercises,
+                    testSets,
+                )
+            );
 
             it('responds with 204 and deletes the set', () => {
                 const setId = 'ede2a3da-4da8-4801-9fe4-f4d4de0daab4';
@@ -396,12 +359,12 @@ describe('Strongly Endpoints', function(){
 
                 return supertest(app)
                     .delete(`/api/sets/${setId}`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res => 
                         supertest(app)
                         .get('/api/sets')
-                        .set('Authorization', makeAuthHeader(testUsers[0]))
+                        .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                         .expect(expectedSets)
                         );
             });
