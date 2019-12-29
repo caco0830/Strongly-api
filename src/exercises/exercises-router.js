@@ -1,7 +1,8 @@
 const express =  require('express');
 const xss = require('xss');
 const ExercisesService = require('./exercises-service');
-const {requireAuth} = require('../middleware/basic-auth');
+//const { requireAuth } = require('../middleware/basic-auth');
+const {requireAuth} = require('../middleware/jwt-auth');
 
 const exercisesRouter = express.Router();
 const jsonParser = express.json();

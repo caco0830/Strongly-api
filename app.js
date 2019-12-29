@@ -7,6 +7,8 @@ const {NODE_ENV} = require('./src/config');
 const workoutsRouter = require('./src/workouts/workouts-router');
 const exercisesRouter = require('./src/exercises/exercises-router');
 const setsRouter = require('./src/sets/sets-router');
+const authRouter = require('./src/auth/auth-router');
+const usersRouter = require('./src/users/users-router');
 
 const app = express();
 
@@ -19,6 +21,8 @@ app.use(cors());
 app.use('/api/workouts', workoutsRouter);
 app.use('/api/exercises', exercisesRouter);
 app.use('/api/sets', setsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello, world!');

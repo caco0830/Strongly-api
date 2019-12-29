@@ -1,12 +1,11 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeExercises, makeWorkoutFixtures} = require('./strongly.fixtures');
 const helpers = require('./test-helpers');
 
 describe('Strongly Endpoints', function(){
     let db;
 
-    const {testUsers, testWorkouts, testExercises, testSets} = makeWorkoutFixtures();
+    const {testUsers, testWorkouts, testExercises, testSets} = helpers.makeWorkoutFixtures();
 
     before('make knex instance', () => {
         db = knex({
@@ -119,7 +118,6 @@ describe('Strongly Endpoints', function(){
 
     //POST exercises
     describe('POST /api/exercises', () => {
-        const testWorkouts = makeWorkouts();
 
         beforeEach('insert workouts', () => 
             helpers.seedWorkoutTables(
@@ -270,8 +268,6 @@ describe('Strongly Endpoints', function(){
         });
 
         context('Given there are exercises', () => {
-            const testWorkouts = makeWorkouts();
-            const testExercises = makeExercises();
 
             beforeEach('insert workouts', () => 
                 helpers.seedWorkoutTables(

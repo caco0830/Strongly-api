@@ -3,7 +3,6 @@ CREATE TABLE strongly_users(
     username TEXT NOT NULL UNIQUE,
     fullname TEXT NOT NULL,
     password TEXT NOT NULL,
-    nickname TEXT,
     date_created TIMESTAMP DEFAULT now() NOT NULL,
     date_modified TIMESTAMP
 );

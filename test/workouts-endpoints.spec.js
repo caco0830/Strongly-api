@@ -1,12 +1,11 @@
 const knex = require('knex');
 const app = require('../app');
-const {makeWorkouts, makeWorkoutFixtures} = require('./strongly.fixtures');
 const helpers = require('./test-helpers');
 
 describe('Workouts Endpoints', function(){
     let db;
 
-    const {testUsers, testWorkouts, testExercises, testSets} = makeWorkoutFixtures();
+    const {testUsers, testWorkouts, testExercises, testSets} = helpers.makeWorkoutFixtures();
 
 
     before('make knex instance', () => {
@@ -22,49 +21,6 @@ describe('Workouts Endpoints', function(){
     before('clean the table', () => db.raw('TRUNCATE strongly_users, strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
 
     afterEach('cleanup', () => db.raw('TRUNCATE strongly_users, strongly_workouts, strongly_exercises, strongly_sets RESTART IDENTITY CASCADE'));
-    
-    describe('Protected Endpoints', () => {
-        const testWorkouts =  makeWorkouts();
-        beforeEach('insert workouts', () => {
-            return db
-               .into('strongly_workouts')
-               .insert(testWorkouts)
-        });
-
-        describe('GET /api/workouts/:workout_id', () => {
-            it(`responds with 401 'Missing basic token' when no basic token`, () => {
-                return supertest(app)
-                    .get('/api/workouts/ce1f061c-1ca7-4f82-81c8-476f08eaa51d')
-                    .expect(401, {error: `Missing basic token`})
-            });
-
-            it(`responds 401 'Unauthorized request' when no credentials in token`, () => {
-                const userNoCreds = {username: '', password: ''}
-                return supertest(app)
-                    .get('/api/workouts/ce1f061c-1ca7-4f82-81c8-476f08eaa51d')
-                    .set('Authorization', helpers.makeAuthHeader(userNoCreds))
-                    .expect(401, {error: `Unauthorized request`});
-            });
-
-            it(`responds 401 'Unauthorized request' when invalid user`, () => {
-                const userInvalidCreds = {username: 'user-bad', password: 'cool'}
-
-                return supertest(app)
-                    .get('/api/workouts/ce1f061c-1ca7-4f82-81c8-476f08eaa51d')
-                    .set('Authorization', helpers.makeAuthHeader(userInvalidCreds))
-                    .expect(401, {error: 'Unauthorized request'});
-            });
-
-            it(`responds 401 'Unauthorized request' when invalid password`, () => {
-                const userInvalidPass = {username: testUsers[0].username, password: 'cool'}
-
-                return supertest(app)
-                    .get('/api/workouts/ce1f061c-1ca7-4f82-81c8-476f08eaa51d')
-                    .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
-                    .expect(401, {error: 'Unauthorized request'});
-            });
-        });
-    });
 
     describe('GET /api/workouts', () => {
         context('Given no workouts', () => {
@@ -116,7 +72,6 @@ describe('Workouts Endpoints', function(){
         });
 
         context('Given there are workouts', () => {
-            const testWorkouts = makeWorkouts();
 
             beforeEach('insert workouts', () => 
                 helpers.seedWorkoutTables(
