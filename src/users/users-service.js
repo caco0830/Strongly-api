@@ -27,8 +27,6 @@ const UsersService = {
         if(password.startsWith(' ') || password.endsWith(' ')){
             return 'Password must not start or end with empty spaces';
         }
-        console.log(password)
-        console.log(REGEX_UPPER_LOWER_NUMBER_SPECIAL.test(password))
         if (!REGEX_UPPER_LOWER_NUMBER_SPECIAL.test(password)) {
             return 'Password must contain 1 upper case, lower case, number and special character'
         }

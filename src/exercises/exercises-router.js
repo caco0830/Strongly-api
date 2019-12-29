@@ -1,7 +1,6 @@
 const express =  require('express');
 const xss = require('xss');
 const ExercisesService = require('./exercises-service');
-//const { requireAuth } = require('../middleware/basic-auth');
 const {requireAuth} = require('../middleware/jwt-auth');
 
 const exercisesRouter = express.Router();
@@ -11,7 +10,8 @@ const serializeExercises = exercise => ({
     db_id: exercise.db_id,
     id: exercise.id,
     workout_id: exercise.workout_id,
-    title: xss(exercise.title)
+    title: xss(exercise.title),
+    user_id: exercise.user_id
 });
 
 exercisesRouter
@@ -31,7 +31,8 @@ exercisesRouter
 
         if(Object.keys(req.query).length === 0){
 
-            ExercisesService.getAllExercises(knexInstance)
+            // ExercisesService.getAllExercises(knexInstance)
+            ExercisesService.getUserExercises(knexInstance, req.user.id)
                 .then(exercises => {
                     res.json(exercises.map(serializeExercises))
                 })

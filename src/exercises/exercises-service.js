@@ -2,6 +2,9 @@ const ExercisesService = {
     getAllExercises(knex){
         return knex.select('*').from('strongly_exercises');
     },
+    getUserExercises(knex, user_id){
+        return knex.select('*').from('strongly_exercises').where({user_id});
+    },
     getExercisesByWorkoutId(knex, workoutId){
         return knex.select('*').from('strongly_exercises').where('workout_id', workoutId);
     },

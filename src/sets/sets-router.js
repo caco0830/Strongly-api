@@ -13,13 +13,15 @@ const serializeSets = set => ({
     reps: set.reps,
     exercise_id: set.exercise_id,
     weight: set.weight,
-    workout_id: set.workout_id
+    workout_id: set.workout_id,
+    user_id: set.user_id
 });
 
 setsRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
+        console.log(req.user)
         const queries = ['exercise_id', 'workout_id'];
         const knexInstance = req.app.get('db');
         const match = [];
@@ -39,6 +41,8 @@ setsRouter
         if(req.query.exercise_id){
             match.exercise_id = req.query.exercise_id;
         }
+
+        match.user_id = req.user.id;
         
         SetsService.getWithQueries(knexInstance, match)
             .then(sets => {

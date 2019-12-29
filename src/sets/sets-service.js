@@ -2,10 +2,14 @@ const SetsService = {
     getAllSets(knex){
         return knex.select('*').from('strongly_sets');
     },
+    getUserSets(knex, user_id){
+        return knex.select('*').from('strong_sets').where({user_id});
+    },
     getById(knex, id){
         return knex.from('strongly_sets').select('*').where('id', id).first();
     },
     getWithQueries(knex, queries){
+        console.log('called')
         return knex
             .from('strongly_sets')
             .select('*')

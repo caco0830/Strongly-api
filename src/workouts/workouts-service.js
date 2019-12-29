@@ -2,6 +2,9 @@ const WorkoutsService = {
     getAllWorkouts(knex){
         return knex.select('*').from('strongly_workouts');
     },
+    getUserWorkouts(knex, user_id){
+        return knex.select('*').from('strongly_workouts').where({user_id})
+    },
     insertWorkouts(knex, newWorkout){
         return knex
             .insert(newWorkout)

@@ -1,7 +1,6 @@
 const express = require('express');
 const xss = require('xss');
 const WorkoutsService = require('./workouts-service');
-//const { requireAuth } = require('../middleware/basic-auth');
 const {requireAuth} = require('../middleware/jwt-auth');
 
 const workoutsRouter = express.Router();
@@ -11,16 +10,19 @@ const serializeWorkout = workout => ({
     db_id: workout.db_id,
     id: workout.id,
     title: xss(workout.title),
-    createddate: workout.createddate
+    createddate: workout.createddate,
+    user_id: workout.user_id
 });
 
 workoutsRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
+        console.log(req.user);
         const knexInstance = req.app.get('db');
-        WorkoutsService.getAllWorkouts(knexInstance)
-            .then(workouts => {
+        // WorkoutsService.getAllWorkouts(knexInstance)
+        WorkoutsService.getUserWorkouts(knexInstance, req.user.id)
+        .then(workouts => {
                 res.json(workouts.map(serializeWorkout))
             })
             .catch(next);
@@ -83,7 +85,7 @@ workoutsRouter
             .catch(next);
     })
     .patch(requireAuth, jsonParser, (req, res, next) => {
-        console.log('patching')
+        //console.log('patching')
         const { title } = req.body;
         const workoutToUpdate = { title };
 
