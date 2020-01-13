@@ -1,7 +1,6 @@
 const express = require('express');
 const xss = require('xss');
 const SetsService = require('./sets-service');
-//const { requireAuth } = require('../middleware/basic-auth');
 const {requireAuth} = require('../middleware/jwt-auth');
 
 const setsRouter = express.Router();
@@ -21,7 +20,6 @@ setsRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
-        console.log(req.user)
         const queries = ['exercise_id', 'workout_id'];
         const knexInstance = req.app.get('db');
         const match = [];

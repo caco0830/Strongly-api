@@ -29,7 +29,6 @@ function requireAuth(req, res, next){
         return res.status(401).json({error: 'Unauthorized request'})
       }
       
-      
       return AuthService.comparePasswords(tokenPassword, user.password)
         .then(passwordsMatch => {
           if(!passwordsMatch) {

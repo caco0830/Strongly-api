@@ -30,14 +30,11 @@ exercisesRouter
         }
 
         if(Object.keys(req.query).length === 0){
-
-            // ExercisesService.getAllExercises(knexInstance)
             ExercisesService.getUserExercises(knexInstance, req.user.id)
                 .then(exercises => {
                     res.json(exercises.map(serializeExercises))
                 })
                 .catch(next);
-
         }else if(Object.keys(req.query).includes('workout_id')){
             ExercisesService.getExercisesByWorkoutId(knexInstance, req.query.workout_id)
                 .then(exercises => {
@@ -71,9 +68,7 @@ exercisesRouter
     })
     .patch(requireAuth, jsonParser,(req, res, next) => {
         const newSet = req.body;
-        console.log(newSet);
-
-
+        
         ExercisesService.updateMultiExercises(
             req.app.get('db'),
             newSet

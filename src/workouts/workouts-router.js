@@ -18,9 +18,8 @@ workoutsRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
-        console.log(req.user);
         const knexInstance = req.app.get('db');
-        // WorkoutsService.getAllWorkouts(knexInstance)
+
         WorkoutsService.getUserWorkouts(knexInstance, req.user.id)
         .then(workouts => {
                 res.json(workouts.map(serializeWorkout))
@@ -85,7 +84,6 @@ workoutsRouter
             .catch(next);
     })
     .patch(requireAuth, jsonParser, (req, res, next) => {
-        //console.log('patching')
         const { title } = req.body;
         const workoutToUpdate = { title };
 
